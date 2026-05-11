@@ -1,20 +1,27 @@
 import { GoogleGenAI, Type } from '@google/genai';
 
 // Initialize the Gemini client using the environment variable injected by the system
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getAI = () => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        throw new Error("GEMINI_API_KEY environment variable is not set. Please add it in Settings > Secrets.");
+    }
+    return new GoogleGenAI({ apiKey });
+};
 
 export async function extractShoeLabel(base64Image: string) {
+    const ai = getAI();
     // Strip headers if present from base64 string
     const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.0-flash', // Fast and robust
         contents: [
             {
                 role: 'user',
                 parts: [
                     { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
-                    { text: 'Extract shoe product information from this label. Return valid JSON only with exactly these keys: shoeName, brand, euSize, usSize, ukSize, color, sku, quantity.\n\nCRITICAL SIZES INSTRUCTIONS:\n- Look at tables/grids. If you see abbreviations like "US 9", "UK 8.5", "F 42 2/3", "EUR 42.5", extract those numbers exactly as they appear (including decimals and fractions).\n- US, UK, and EU size are mandatory fields if they exist anywhere on the label.\n- Do not overthink, just extract the visible numbers or letters next to the size labels.\n- Keep it extremely fast.\n- If a field is really missing, leave as empty string.' }
+                    { text: 'Extract shoe product information from this label. CRITICAL FOCUS: THE UK SIZE IS MANDATORY. Extract exactly what is written next to UK/U.K. or in the UK grid cell.' }
                 ]
             }
         ],
@@ -27,23 +34,24 @@ export async function extractShoeLabel(base64Image: string) {
                     brand: { type: Type.STRING, description: "Brand (Nike, Adidas, Puma, etc)" },
                     euSize: { type: Type.STRING, description: "EU Shoe Size" },
                     usSize: { type: Type.STRING, description: "US Shoe Size" },
-                    ukSize: { type: Type.STRING, description: "UK Shoe Size" },
+                    ukSize: { type: Type.STRING, description: "UK Shoe Size - This is the most important field" },
                     color: { type: Type.STRING, description: "Color or Color Code" },
                     sku: { type: Type.STRING, description: "SKU, Barcode, or Article No (ART No)" },
                     quantity: { type: Type.STRING, description: "Quantity if stated" },
-                }
+                },
+                required: ["ukSize"]
             }
         }
     });
 
     try {
         if (!response.text) {
-            throw new Error("Empty response from AI");
+            throw new Error("AI returned an empty response.");
         }
         console.log("Raw AI response:", response.text);
         return JSON.parse(response.text);
     } catch (e) {
         console.error("Parse error:", e);
-        throw new Error("Failed to parse AI response.");
+        throw new Error("The AI failed to format the brand/size data correctly. Please retry or enter manually.");
     }
 }
