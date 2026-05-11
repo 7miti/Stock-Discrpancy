@@ -14,7 +14,7 @@ export async function extractShoeLabel(base64Image: string) {
                 role: 'user',
                 parts: [
                     { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
-                    { text: 'Extract shoe product information from this label. Return valid JSON only with the exact keys: shoeName, brand, euSize, usSize, ukSize, color, sku, quantity. Extract sizes exactly as they appear on the label, whether they are numbers (e.g., 9, 10.5, 42, 42.5, 42 2/3) or letters (e.g., S, M, L, XL, XS). They might be in a tabular format next to abbreviations like US, UK, EUR, F, D, J, CM. If you see multiple sizes, extract the explicitly labeled US, UK, and EU sizes. SKU is usually an alphanumeric barcode string or ART/Article No, sometimes located above a barcode. If a field is not found, leave it as an empty string.' }
+                    { text: 'Extract shoe product information from this label. Return valid JSON only with the exact keys: shoeName, brand, euSize, usSize, ukSize, color, sku, quantity.\n\nCRITICAL INSTRUCTIONS FOR SIZES:\n- Look VERY closely for grids, tables, or lists of numbers.\n- Shoe labels almost ALWAYS show sizes. You must find them.\n- Look next to or below abbreviations like: US, UK, EU, EUR, F, FR, D, CM, CHN, JP.\n- Sizes might be whole numbers (7, 10, 42) or decimals/fractions (7.5, 10.5, 42.5, 42 2/3).\n- Sizes might also be letters (S, M, L, XL, OSFA).\n- Do not skip sizes. If you see "US 9" and "UK 8", extract them into the correct fields!\n- SKU/Article Number is usually a distinct alphanumeric code (e.g., CW2288-111, GX3060, ART NO. 1234).\n- If a field is truly not found, leave it as an empty string.' }
                 ]
             }
         ],
