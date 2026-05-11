@@ -75,17 +75,17 @@ export default function EditResult({ initialData, imageUrl, onSave, onDiscard }:
                     </div>
 
                     <div className="grid grid-cols-3 gap-5 pt-2">
-                        <div>
+                        <div className="border border-[#6366f1]/30 rounded-xl p-2 bg-[#6366f1]/5">
+                            <label className="block text-[10px] uppercase tracking-widest text-[#6366f1] mb-1.5 font-bold">UK Size</label>
+                            <input type="text" name="ukSize" value={formData.ukSize} onChange={handleChange} className="w-full border-b border-[#6366f1]/30 bg-transparent text-white py-1 focus:border-[#6366f1] focus:outline-none placeholder:text-gray-600 transition-colors" placeholder="8" />
+                        </div>
+                        <div className="p-2">
                             <label className="block text-[10px] uppercase tracking-widest text-gray-500 mb-1.5">US Size</label>
-                            <input type="text" name="usSize" value={formData.usSize} onChange={handleChange} className="w-full border-b border-white/10 bg-transparent text-white py-1.5 focus:border-[#6366f1] focus:outline-none placeholder:text-gray-600 transition-colors" placeholder="9" />
+                            <input type="text" name="usSize" value={formData.usSize} onChange={handleChange} className="w-full border-b border-white/10 bg-transparent text-white py-1 focus:border-[#6366f1] focus:outline-none placeholder:text-gray-600 transition-colors" placeholder="9" />
                         </div>
-                        <div>
+                        <div className="p-2">
                             <label className="block text-[10px] uppercase tracking-widest text-gray-500 mb-1.5">EU Size</label>
-                            <input type="text" name="euSize" value={formData.euSize} onChange={handleChange} className="w-full border-b border-white/10 bg-transparent text-white py-1.5 focus:border-[#6366f1] focus:outline-none placeholder:text-gray-600 transition-colors" placeholder="42" />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] uppercase tracking-widest text-gray-500 mb-1.5">UK Size</label>
-                            <input type="text" name="ukSize" value={formData.ukSize} onChange={handleChange} className="w-full border-b border-white/10 bg-transparent text-white py-1.5 focus:border-[#6366f1] focus:outline-none placeholder:text-gray-600 transition-colors" placeholder="8" />
+                            <input type="text" name="euSize" value={formData.euSize} onChange={handleChange} className="w-full border-b border-white/10 bg-transparent text-white py-1 focus:border-[#6366f1] focus:outline-none placeholder:text-gray-600 transition-colors" placeholder="42" />
                         </div>
                     </div>
 
