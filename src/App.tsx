@@ -33,8 +33,8 @@ export default function App() {
       const errorString = JSON.stringify(e);
       if (errorString.includes("429") || errorString.includes("RESOURCE_EXHAUSTED")) {
         errorMessage = "The AI is currently busy (Rate Limit reached). Please wait 60 seconds or enter the details manually below.";
-      } else if (errorString.includes("API_KEY")) {
-        errorMessage = "Gemini API key is missing. Please check your Settings.";
+      } else if (errorString.includes("API_KEY") || errorString.includes("Unauthorized")) {
+        errorMessage = "AI Service API Key is missing or invalid. Please check your Settings > Secrets.";
       } else {
         errorMessage = typeof e === 'string' ? e : (e.message || "Unknown error during extraction.");
       }
