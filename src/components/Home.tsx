@@ -70,8 +70,8 @@ export default function Home({ onNavigate }: { onNavigate: (view: string) => voi
                                             <p className="text-xs text-gray-500 font-mono mt-0.5">{r.sku || 'N/A'}</p>
                                         </td>
                                         <td className="px-5 py-4 text-right">
-                                            <p className="text-xs text-white">{(r.euSize || r.usSize) && `Sz: ${r.euSize || r.usSize}`}</p>
-                                            <p className="text-xs text-gray-500 mt-0.5">{new Date(r.scannedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                            <p className="text-xs font-bold text-[#6366f1]">{r.ukSize ? `UK ${r.ukSize}` : (r.euSize || r.usSize || 'N/A')}</p>
+                                            <p className="text-[10px] text-gray-500 mt-0.5">{new Date(r.scannedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                                         </td>
                                     </tr>
                                 ))}
