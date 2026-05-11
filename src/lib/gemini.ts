@@ -20,7 +20,7 @@ export async function extractShoeLabel(base64Image: string) {
                     content: [
                         {
                             type: 'text',
-                            text: 'Extract shoe product information from this label. Return valid JSON only with exactly these keys: shoeName, brand, euSize, usSize, ukSize, color, sku, quantity. CRITICAL FOCUS: YOU MUST EXTRACT THE UK SIZE ACCURATELY. If a field is missing, use an empty string.'
+                            text: 'Extract shoe label details into JSON. FOCUS: UK SIZE IS MANDATORY. Look for "UK" or "U.K." labels. Extract the number or letter exactly (e.g., 8, 8.5, 9, M). Also get Brand, shoeName, SKU, and Color. Return valid JSON with keys: shoeName, brand, euSize, usSize, ukSize, color, sku, quantity. Empty string if not found.'
                         },
                         {
                             type: 'image_url',
@@ -46,14 +46,17 @@ export async function extractShoeLabel(base64Image: string) {
             throw new Error("OpenRouter returned an empty response.");
         }
 
-        const content = response.data.choices[0].message.content;
+        let content = response.data.choices[0].message.content;
         console.log("Raw OpenRouter response:", content);
+        
+        // Clean JSON if needed (remove markdown formatting)
+        content = content.replace(/```json/g, '').replace(/```/g, '').trim();
         
         try {
             return JSON.parse(content);
         } catch (parseError) {
             console.error("JSON Parse error:", content);
-            throw new Error("AI returned data in an invalid format. Please try again.");
+            throw new Error("The AI failed to format the brand/size data correctly. Please retry or enter manually.");
         }
     } catch (error: any) {
         console.error("OpenRouter API Error:", error.response?.data || error.message);
