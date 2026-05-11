@@ -65,13 +65,28 @@ export default function CameraScanner({ onCapture, onClose }: ScannerProps) {
 
     const captureFrame = () => {
         if (!videoRef.current) return;
+        const video = videoRef.current;
         const canvas = document.createElement('canvas');
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
+        
+        // Downscale large images to speed up AI processing
+        const MAX_DIMENSION = 1200;
+        let width = video.videoWidth;
+        let height = video.videoHeight;
+        
+        if (width > height && width > MAX_DIMENSION) {
+            height *= MAX_DIMENSION / width;
+            width = MAX_DIMENSION;
+        } else if (height > MAX_DIMENSION) {
+            width *= MAX_DIMENSION / height;
+            height = MAX_DIMENSION;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-            ctx.drawImage(videoRef.current, 0, 0);
-            const base64 = canvas.toDataURL('image/jpeg', 0.9);
+            ctx.drawImage(video, 0, 0, width, height);
+            const base64 = canvas.toDataURL('image/jpeg', 0.8); // 80% quality for faster upload
             stopCamera();
             onCapture(base64);
         }
@@ -84,8 +99,32 @@ export default function CameraScanner({ onCapture, onClose }: ScannerProps) {
         const reader = new FileReader();
         reader.onloadend = () => {
             if (typeof reader.result === 'string') {
-                stopCamera();
-                onCapture(reader.result);
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_DIMENSION = 1200;
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > height && width > MAX_DIMENSION) {
+                        height *= MAX_DIMENSION / width;
+                        width = MAX_DIMENSION;
+                    } else if (height > MAX_DIMENSION) {
+                        width *= MAX_DIMENSION / height;
+                        height = MAX_DIMENSION;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                        stopCamera();
+                        onCapture(base64);
+                    }
+                };
+                img.src = reader.result;
             }
         };
         reader.readAsDataURL(file);
