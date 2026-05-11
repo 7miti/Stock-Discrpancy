@@ -15,13 +15,13 @@ export async function extractShoeLabel(base64Image: string) {
     const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash', // Fast and robust
+        model: 'gemini-1.5-flash', // More stable quota on free tier
         contents: [
             {
                 role: 'user',
                 parts: [
                     { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
-                    { text: 'Extract shoe product information from this label. CRITICAL FOCUS: THE UK SIZE IS MANDATORY. Extract exactly what is written next to UK/U.K. or in the UK grid cell.' }
+                    { text: 'Extract shoe label info. UK SIZE is the priority focus. Find numbers/letters next to UK/U.K./GB. Also get Brand, Model (shoeName), SKU, Color. Return JSON.' }
                 ]
             }
         ],
@@ -30,14 +30,14 @@ export async function extractShoeLabel(base64Image: string) {
             responseSchema: {
                 type: Type.OBJECT,
                 properties: {
-                    shoeName: { type: Type.STRING, description: "Name or Model of the shoe" },
-                    brand: { type: Type.STRING, description: "Brand (Nike, Adidas, Puma, etc)" },
-                    euSize: { type: Type.STRING, description: "EU Shoe Size" },
-                    usSize: { type: Type.STRING, description: "US Shoe Size" },
-                    ukSize: { type: Type.STRING, description: "UK Shoe Size - This is the most important field" },
-                    color: { type: Type.STRING, description: "Color or Color Code" },
-                    sku: { type: Type.STRING, description: "SKU, Barcode, or Article No (ART No)" },
-                    quantity: { type: Type.STRING, description: "Quantity if stated" },
+                    shoeName: { type: Type.STRING },
+                    brand: { type: Type.STRING },
+                    euSize: { type: Type.STRING },
+                    usSize: { type: Type.STRING },
+                    ukSize: { type: Type.STRING, description: "Extract values next to UK labels" },
+                    color: { type: Type.STRING },
+                    sku: { type: Type.STRING },
+                    quantity: { type: Type.STRING },
                 },
                 required: ["ukSize"]
             }
