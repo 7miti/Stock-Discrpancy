@@ -6,10 +6,11 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: '/Stock-Discrpancy/', // <--- ADD THIS LINE (Replace with your exact GitHub repo name)
-    plugins: [react(), tailwindcss()],
+    base: '/Stock-Discrpancy/', // <--- ADD THIS LINE (use your exact repo name)
+    plugins:[react(), tailwindcss()],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      // CHANGE THIS LINE to use OPENROUTER instead of GEMINI
+      'process.env.OPENROUTER_API_KEY': JSON.stringify(env.OPENROUTER_API_KEY),
     },
     resolve: {
       alias: {
