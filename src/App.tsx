@@ -27,13 +27,19 @@ export default function App() {
       setExtractedData(data);
     } catch (e: any) {
       console.error("Extraction error:", e);
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      // Give more specific hints for common failures
-      if (errorMessage.includes("API_KEY") || errorMessage.includes("API key")) {
-        alert("Gemini API key is missing or invalid. Please check your AI Studio settings.");
+      let errorMessage = "Problem extracting data.";
+      
+      // Check for character-heavy JSON or specific quota strings
+      const errorString = JSON.stringify(e);
+      if (errorString.includes("429") || errorString.includes("RESOURCE_EXHAUSTED")) {
+        errorMessage = "The AI is currently busy (Rate Limit reached). Please wait 60 seconds or enter the details manually below.";
+      } else if (errorString.includes("API_KEY")) {
+        errorMessage = "Gemini API key is missing. Please check your Settings.";
       } else {
-        alert(`Problem extracting data: ${errorMessage}\nYou can still enter details manually.`);
+        errorMessage = typeof e === 'string' ? e : (e.message || "Unknown error during extraction.");
       }
+
+      alert(errorMessage);
       setExtractedData({});
     } finally {
       setIsProcessing(false);
