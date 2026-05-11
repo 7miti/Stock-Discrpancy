@@ -21,9 +21,19 @@ export default function App() {
 
     try {
       const data = await extractShoeLabel(base64Img);
-      setExtractedData(data || {});
+      if (!data || Object.keys(data).length === 0) {
+        throw new Error("No data could be extracted from this image.");
+      }
+      setExtractedData(data);
     } catch (e: any) {
-      alert("Error extracting label data. You can enter it manually.");
+      console.error("Extraction error:", e);
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      // Give more specific hints for common failures
+      if (errorMessage.includes("API_KEY") || errorMessage.includes("API key")) {
+        alert("Gemini API key is missing or invalid. Please check your AI Studio settings.");
+      } else {
+        alert(`Problem extracting data: ${errorMessage}\nYou can still enter details manually.`);
+      }
       setExtractedData({});
     } finally {
       setIsProcessing(false);
