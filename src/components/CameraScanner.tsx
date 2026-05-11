@@ -68,8 +68,8 @@ export default function CameraScanner({ onCapture, onClose }: ScannerProps) {
         const video = videoRef.current;
         const canvas = document.createElement('canvas');
         
-        // Downscale large images to speed up AI processing
-        const MAX_DIMENSION = 1200;
+        // Downscale large images to speed up AI processing significantly
+        const MAX_DIMENSION = 800;
         let width = video.videoWidth;
         let height = video.videoHeight;
         
@@ -86,7 +86,7 @@ export default function CameraScanner({ onCapture, onClose }: ScannerProps) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
             ctx.drawImage(video, 0, 0, width, height);
-            const base64 = canvas.toDataURL('image/jpeg', 0.8); // 80% quality for faster upload
+            const base64 = canvas.toDataURL('image/jpeg', 0.6); // 60% quality for faster upload
             stopCamera();
             onCapture(base64);
         }
@@ -102,7 +102,7 @@ export default function CameraScanner({ onCapture, onClose }: ScannerProps) {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_DIMENSION = 1200;
+                    const MAX_DIMENSION = 800;
                     let width = img.width;
                     let height = img.height;
                     
@@ -119,7 +119,7 @@ export default function CameraScanner({ onCapture, onClose }: ScannerProps) {
                     const ctx = canvas.getContext('2d');
                     if (ctx) {
                         ctx.drawImage(img, 0, 0, width, height);
-                        const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                        const base64 = canvas.toDataURL('image/jpeg', 0.6);
                         stopCamera();
                         onCapture(base64);
                     }
