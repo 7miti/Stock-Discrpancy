@@ -93,6 +93,10 @@ export default function ShoeList({ onBack }: { onBack: () => void }) {
                                     </button>
                                 </div>
                                 <div className="grid grid-cols-3 divide-x divide-white/[0.03] bg-black/20 text-center py-3">
+                                    <div className="bg-[#6366f1]/5">
+                                        <div className="text-[10px] text-[#6366f1] font-medium uppercase tracking-widest mb-1.5">UK Size</div>
+                                        <div className="font-bold text-white text-sm">{shoe.ukSize || '-'}</div>
+                                    </div>
                                     <div>
                                         <div className="text-[10px] text-gray-500 font-medium uppercase tracking-widest mb-1.5">US Size</div>
                                         <div className="font-medium text-white text-sm">{shoe.usSize || '-'}</div>
@@ -100,10 +104,6 @@ export default function ShoeList({ onBack }: { onBack: () => void }) {
                                     <div>
                                         <div className="text-[10px] text-gray-500 font-medium uppercase tracking-widest mb-1.5">EU Size</div>
                                         <div className="font-medium text-white text-sm">{shoe.euSize || '-'}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-[10px] text-gray-500 font-medium uppercase tracking-widest mb-1.5">UK Size</div>
-                                        <div className="font-medium text-white text-sm">{shoe.ukSize || '-'}</div>
                                     </div>
                                 </div>
                             </div>
