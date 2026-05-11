@@ -1,57 +1,63 @@
-import { GoogleGenAI, Type } from '@google/genai';
-
-// Initialize the Gemini client using the environment variable injected by the system
-const getAI = () => {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        throw new Error("GEMINI_API_KEY environment variable is not set. Please add it in Settings > Secrets.");
-    }
-    return new GoogleGenAI({ apiKey });
-};
+import axios from 'axios';
 
 export async function extractShoeLabel(base64Image: string) {
-    const ai = getAI();
-    // Strip headers if present from base64 string
-    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+        throw new Error("OPENROUTER_API_KEY is not set. Please add it in Settings > Secrets.");
+    }
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash', // More stable quota on free tier
-        contents: [
-            {
-                role: 'user',
-                parts: [
-                    { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
-                    { text: 'Extract shoe label info. UK SIZE is the priority focus. Find numbers/letters next to UK/U.K./GB. Also get Brand, Model (shoeName), SKU, Color. Return JSON.' }
-                ]
-            }
-        ],
-        config: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    shoeName: { type: Type.STRING },
-                    brand: { type: Type.STRING },
-                    euSize: { type: Type.STRING },
-                    usSize: { type: Type.STRING },
-                    ukSize: { type: Type.STRING, description: "Extract values next to UK labels" },
-                    color: { type: Type.STRING },
-                    sku: { type: Type.STRING },
-                    quantity: { type: Type.STRING },
-                },
-                required: ["ukSize"]
-            }
-        }
-    });
+    // Ensure base64 string has the correct data URI prefix for the API
+    const dataUri = base64Image.startsWith('data:') 
+        ? base64Image 
+        : `data:image/jpeg;base64,${base64Image}`;
 
     try {
-        if (!response.text) {
-            throw new Error("AI returned an empty response.");
+        const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+            model: 'google/gemini-2.0-flash-001',
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'text',
+                            text: 'Extract shoe product information from this label. Return valid JSON only with exactly these keys: shoeName, brand, euSize, usSize, ukSize, color, sku, quantity. CRITICAL FOCUS: YOU MUST EXTRACT THE UK SIZE ACCURATELY. If a field is missing, use an empty string.'
+                        },
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: dataUri
+                            }
+                        }
+                    ]
+                }
+            ],
+            response_format: { type: 'json_object' }
+        }, {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': 'https://ai.studio/build',
+                'X-Title': 'Stockdiscrepancy'
+            },
+            timeout: 30000 // 30 second timeout
+        });
+
+        if (!response.data || !response.data.choices || response.data.choices.length === 0) {
+            throw new Error("OpenRouter returned an empty response.");
         }
-        console.log("Raw AI response:", response.text);
-        return JSON.parse(response.text);
-    } catch (e) {
-        console.error("Parse error:", e);
-        throw new Error("The AI failed to format the brand/size data correctly. Please retry or enter manually.");
+
+        const content = response.data.choices[0].message.content;
+        console.log("Raw OpenRouter response:", content);
+        
+        try {
+            return JSON.parse(content);
+        } catch (parseError) {
+            console.error("JSON Parse error:", content);
+            throw new Error("AI returned data in an invalid format. Please try again.");
+        }
+    } catch (error: any) {
+        console.error("OpenRouter API Error:", error.response?.data || error.message);
+        const apiErrorMessage = error.response?.data?.error?.message || error.message;
+        throw new Error(`AI Service Error: ${apiErrorMessage}`);
     }
 }
